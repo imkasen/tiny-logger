@@ -23,11 +23,16 @@ public:
     };
 
 public:
-    TinyLogger();
-    TinyLogger(const LogTarget &target, const LogLevel &level, const std::string &path);
     ~TinyLogger();
+    TinyLogger(const TinyLogger &rhs) = delete;
+    TinyLogger(TinyLogger &&rhs) = delete;
+    TinyLogger &operator=(const TinyLogger &rhs) = delete;
+    TinyLogger &operator=(TinyLogger &&rhs) = delete;
 
-    static std::string getCurrentTime();
+    static TinyLogger &getInstance();
+    void init(const LogTarget &target, const LogLevel &level, const std::string &path);
+    std::string getCurrentTime();
+
     void DEBUG(const std::string &text);
     void INFO(const std::string &text);
     void WARNING(const std::string &text);
@@ -38,6 +43,8 @@ private:
     LogLevel level;
     std::string path;  // 日志文件路径
     std::ofstream outFile;
+
+    TinyLogger();
     void output(const std::string &text, const LogLevel &level);  // 输出行为
 };
 
