@@ -11,7 +11,7 @@ class BlockQueue
 {
 private:
     std::queue<T> que;
-    typename std::queue<T>::size_type cap;
+    typename std::queue<T>::size_type cap;  // capacity
 
     std::mutex mtx;
     std::atomic_bool isClose;
@@ -42,7 +42,7 @@ public:
     T back();
 
     void push(const T &item);
-    bool pop();
+    bool pop(T &item);
 };
 
 template<typename T>
@@ -144,7 +144,7 @@ void BlockQueue<T>::push(const T &item)
 }
 
 template<typename T>
-bool BlockQueue<T>::pop()
+bool BlockQueue<T>::pop(T &item)
 {
     std::unique_lock<std::mutex> lck(mtx);
     while (this->que.empty())
@@ -155,6 +155,7 @@ bool BlockQueue<T>::pop()
             return false;
         }
     }
+    item = this->que.front();
     this->que.pop();
     this->producer.notify_one();
     return true;

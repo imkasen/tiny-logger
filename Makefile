@@ -2,7 +2,7 @@ CC := g++
 OUT := test
 
 default: *.cpp
-	$(CC) *.cpp -o $(OUT) -std=c++11
+	$(CC) *.cpp -o $(OUT) -std=c++14
 
 .PHONY: clean
 clean:

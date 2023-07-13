@@ -1,21 +1,25 @@
 #ifndef TINY_LOGGER_H
 #define TINY_LOGGER_H
 
+#include "block_queue.h"
 #include <fstream>
+#include <memory>
 #include <string>
+#include <thread>
 
 class TinyLogger
 {
 public:
-    enum class LogLevel  // 日志等级
+    enum class LogLevel
     {
         debug,
         info,
         warning,
-        error
+        error,
+        fatal
     };
 
-    enum class LogTarget  // 日志输出目标
+    enum class LogTarget
     {
         file,
         terminal,
@@ -29,23 +33,35 @@ public:
     TinyLogger &operator=(const TinyLogger &rhs) = delete;
     TinyLogger &operator=(TinyLogger &&rhs) = delete;
 
-    static TinyLogger &getInstance();
-    void init(const LogTarget &target, const LogLevel &level, const std::string &path);
+    static TinyLogger *getInstance();
+    void init(const LogTarget &target, const LogLevel &level, const std::string &path = "./log",
+              const size_t maxQueueCapacity = 1024);
     std::string getCurrentTime();
+    static void flushLogThread();
 
     void DEBUG(const std::string &text);
     void INFO(const std::string &text);
     void WARNING(const std::string &text);
     void ERROR(const std::string &text);
+    void FATAL(const std::string &text);
 
 private:
     LogTarget target;
     LogLevel level;
-    std::string path;  // 日志文件路径
+    std::string path;  // log file path
     std::ofstream outFile;
 
+    bool isAsync;
+
+    std::mutex mtx;
+
+    std::unique_ptr<BlockQueue<std::string>> blockQueue;
+    std::unique_ptr<std::thread> writeThread;
+
+private:
     TinyLogger();
-    void output(const std::string &text, const LogLevel &level);  // 输出行为
+    void write(const std::string &text, const LogLevel &level);
+    void asyncOutput();
 };
 
 #endif
