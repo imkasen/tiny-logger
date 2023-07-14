@@ -1,7 +1,6 @@
 #ifndef BLOCK_QUEUE_H
 #define BLOCK_QUEUE_H
 
-#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -14,7 +13,7 @@ private:
     typename std::queue<T>::size_type cap;  // capacity
 
     std::mutex mtx;
-    std::atomic_bool isClose;
+    bool isClose;  // TODO: atomic?
 
     std::condition_variable consumer;
     std::condition_variable producer;
@@ -46,9 +45,8 @@ public:
 };
 
 template<typename T>
-BlockQueue<T>::BlockQueue(const size_t maxCap) : cap(maxCap)
+BlockQueue<T>::BlockQueue(const size_t maxCap) : cap(maxCap), isClose(false)
 {
-    this->isClose = ATOMIC_VAR_INIT(false);
 }
 
 template<typename T>
@@ -60,14 +58,13 @@ BlockQueue<T>::~BlockQueue()
 template<typename T>
 void BlockQueue<T>::close()
 {
+    std::lock_guard<std::mutex> lck(mtx);
+    while (!this->que.empty())
     {
-        std::lock_guard<std::mutex> lck(mtx);
-        while (!this->que.empty())
-        {
-            this->que.pop();
-        }
-        this->isClose = true;
+        this->que.pop();
     }
+    this->isClose = true;
+
     this->producer.notify_all();
     this->consumer.notify_all();
 }

@@ -20,7 +20,6 @@ TinyLogger::TinyLogger()
 
 TinyLogger::~TinyLogger()
 {
-    // ?
     if (this->writeThread && this->writeThread->joinable())
     {
         while (!this->blockQueue->empty())
@@ -111,6 +110,7 @@ void TinyLogger::flushLogThread()
 void TinyLogger::asyncOutput()
 {
     string msg = "";
+    // TODO: always true
     while (this->blockQueue->pop(msg))
     {
         std::lock_guard<std::mutex> lck(mtx);
