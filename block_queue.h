@@ -146,11 +146,11 @@ bool BlockQueue<T>::pop(T &item)
     std::unique_lock<std::mutex> lck(mtx);
     while (this->que.empty())
     {
-        this->consumer.wait(lck);
         if (this->isClose)
         {
             return false;
         }
+        this->consumer.wait(lck);
     }
     item = this->que.front();
     this->que.pop();

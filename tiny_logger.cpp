@@ -110,7 +110,6 @@ void TinyLogger::flushLogThread()
 void TinyLogger::asyncOutput()
 {
     string msg = "";
-    // TODO: always true
     while (this->blockQueue->pop(msg))
     {
         std::lock_guard<std::mutex> lck(mtx);
