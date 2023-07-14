@@ -27,16 +27,16 @@ public:
     };
 
 public:
-    ~TinyLogger();
-    TinyLogger(const TinyLogger &rhs) = delete;
-    TinyLogger(TinyLogger &&rhs) = delete;
-    TinyLogger &operator=(const TinyLogger &rhs) = delete;
-    TinyLogger &operator=(TinyLogger &&rhs) = delete;
-
     static TinyLogger *getInstance();
     void init(const LogTarget &target, const LogLevel &level, const std::string &path = "./log",
-              const size_t maxQueueCapacity = 1024);
+              const size_t maxQueueCapacity = 0);
+
     std::string getCurrentTime();
+    void setLevel(const LogLevel &level);
+    LogLevel getLevel() const;
+    void setTarget(const LogTarget &target);
+    LogTarget getTarget() const;
+
     static void flushLogThread();
 
     void DEBUG(const std::string &text);
@@ -60,6 +60,13 @@ private:
 
 private:
     TinyLogger();
+    ~TinyLogger();
+
+    TinyLogger(const TinyLogger &rhs) = delete;
+    TinyLogger(TinyLogger &&rhs) = delete;
+    TinyLogger &operator=(const TinyLogger &rhs) = delete;
+    TinyLogger &operator=(TinyLogger &&rhs) = delete;
+
     void write(const std::string &text, const LogLevel &level);
     void asyncOutput();
 };

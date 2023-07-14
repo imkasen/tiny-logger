@@ -7,7 +7,7 @@ using std::string;
 
 // TODO: async, promise and future, ...
 // TODO: comments
-// TODO: config mingw，C++11, 14, 17
+// TODO: config mingw，C++11, 14
 
 TinyLogger::TinyLogger()
 {
@@ -20,11 +20,7 @@ TinyLogger::TinyLogger()
 
 TinyLogger::~TinyLogger()
 {
-    // TODO: write end msg
-    const string &msg =
-        "[Tiny Logger] " + static_cast<string>(__FILE__) + " " + this->getCurrentTime() + " : ==== End logging ====\n";
-    // ...
-
+    // ?
     if (this->writeThread && this->writeThread->joinable())
     {
         while (!this->blockQueue->empty())
@@ -39,6 +35,7 @@ TinyLogger::~TinyLogger()
     {
         std::lock_guard<std::mutex> lck(mtx);
         this->outFile.flush();
+        this->outFile << "\n";
         this->outFile.close();
     }
 }
@@ -56,26 +53,21 @@ void TinyLogger::init(const LogTarget &target, const LogLevel &level, const std:
     this->level = level;
     this->path = path;
 
+    if (this->target != LogTarget::terminal)
+    {
+        std::lock_guard<std::mutex> lck(mtx);
+        this->outFile.open(this->path, std::ios::out | std::ios::app);
+    }
+
     if (maxQueueCapacity > 1)  //  maxCapacity > 1: async, maxCapacity == 1: sync
     {
         this->isAsync = true;
         blockQueue = std::make_unique<BlockQueue<string>>(maxQueueCapacity);
         writeThread = std::make_unique<std::thread>(flushLogThread);
     }
-
-    std::lock_guard<std::mutex> lck(mtx);  // ?
-
-    if (this->target != LogTarget::terminal)
-    {
-        this->outFile.open(this->path, std::ios::out | std::ios::app);
-    }
-
-    // TODO: write init msg
-    const string &msg = "[Tiny Logger] " + static_cast<string>(__FILE__) + " " + TinyLogger::getCurrentTime() +
-                        " : ==== Start logging ====\n";
-    // ...
 }
 
+/*
 string TinyLogger::getCurrentTime()
 {
     std::time_t now_t = time(nullptr);
@@ -88,6 +80,27 @@ string TinyLogger::getCurrentTime()
     return std::to_string(now_s.tm_year + 1900) + "-" + std::to_string(now_s.tm_mon + 1) + "-" +
            std::to_string(now_s.tm_mday) + " " + std::to_string(now_s.tm_hour) + ":" + std::to_string(now_s.tm_min) +
            ":" + std::to_string(now_s.tm_sec);
+}
+*/
+
+void TinyLogger::setLevel(const LogLevel &level)
+{
+    this->level = level;
+}
+
+TinyLogger::LogLevel TinyLogger::getLevel() const
+{
+    return this->level;
+}
+
+void TinyLogger::setTarget(const LogTarget &target)
+{
+    this->target = target;
+}
+
+TinyLogger::LogTarget TinyLogger::getTarget() const
+{
+    return this->target;
 }
 
 void TinyLogger::flushLogThread()
@@ -115,49 +128,48 @@ void TinyLogger::asyncOutput()
 void TinyLogger::write(const std::string &text, const LogLevel &level)
 {
     std::lock_guard<std::mutex> lck(mtx);
-
-    string msg;
+    string msg = "";
     switch (level)
     {
         case LogLevel::debug:
-            msg = "[DEBUG] ";
+            msg = "[DEBUG]   ";
             break;
         case LogLevel::info:
-            msg = "[INFO] ";
+            msg = "[INFO]    ";
             break;
         case LogLevel::warning:
             msg = "[WARNING] ";
             break;
         case LogLevel::error:
-            msg = "[ERROR] ";
+            msg = "[ERROR]   ";
             break;
         case LogLevel::fatal:
-            msg = "[FATAL] ";
+            msg = "[FATAL]   ";
             break;
         default:
             msg = "[UNKNOWN] ";
             break;
     }
-    // TODO: rewrite msg structure
     // TODO: __FILE__, __FUNC__, __TIME__, ...
-    msg += static_cast<string>(__FILE__) + " " + this->getCurrentTime() + " : " + text + "\n";
+    msg += static_cast<string>(__DATE__) + " " + static_cast<string>(__TIME__) + " " + std::to_string(__LINE__) + " " +
+           +__FUNCTION__ + " " + __FILE__ + " : " + text + "\n";
 
-    if (this->isAsync && this->blockQueue && !this->blockQueue->full())
+    if (level >= this->level)
     {
-        if (this->level <= level)
+        if (this->isAsync && this->blockQueue && !this->blockQueue->full())
         {
             this->blockQueue->push(msg);
         }
-    }
-    else  // sync
-    {
-        if (this->level <= level && this->target != LogTarget::file)
+        else  // sync
         {
-            std::cout << msg;
-        }
-        if (this->level <= level && this->target != LogTarget::terminal)
-        {
-            this->outFile << msg;
+            if (this->target != LogTarget::file)
+            {
+                std::cout << msg;
+            }
+            if (this->target != LogTarget::terminal)
+            {
+                this->outFile << msg;
+            }
         }
     }
 }

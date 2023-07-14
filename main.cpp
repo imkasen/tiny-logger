@@ -2,11 +2,14 @@
 
 int main()
 {
-    TinyLogger logger(TinyLogger::LogTarget::file_and_terminal, TinyLogger::LogLevel::debug, "log.log");
-    logger.DEBUG("debug");
-    logger.ERROR("error");
-    logger.INFO("info");
-    logger.WARNING("warning");
+    auto logger = TinyLogger::getInstance();
+    logger->init(TinyLogger::LogTarget::file_and_terminal, TinyLogger::LogLevel::debug, "./log", 1024);
+
+    logger->DEBUG("debug");
+    logger->INFO("info");
+    logger->WARNING("warning");
+    logger->ERROR("error");
+    logger->FATAL("fatal");
 
     return 0;
 }
