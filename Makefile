@@ -1,9 +1,9 @@
 CC := g++
-OUT := test
+OUT := logger
 
-default: *.cpp
-	$(CC) *.cpp -o $(OUT) -std=c++14
+default: main.cpp tiny_logger.cpp
+	$(CC) main.cpp tiny_logger.cpp -o $(OUT) -pthread -std=c++14
 
 .PHONY: clean
 clean:
-	@rm $(OUT)
+	@rm -f $(OUT)
