@@ -46,20 +46,20 @@ public:
     // void FATAL(const std::string &text);
 
 private:
-    LogTarget target;
-    LogLevel level;
-    std::string path;  // log file path
+    LogTarget target = LogTarget::terminal;
+    LogLevel level = LogLevel::debug;
+    std::string path = "";  // log file path
     std::ofstream outFile;
 
-    bool isAsync;
+    bool isAsync = false;
 
     std::mutex mtx;
 
-    std::unique_ptr<BlockQueue<std::string>> blockQueue;
-    std::unique_ptr<std::thread> writeThread;
+    std::unique_ptr<BlockQueue<std::string>> blockQueue = nullptr;
+    std::unique_ptr<std::thread> writeThread = nullptr;
 
 private:
-    TinyLogger();
+    TinyLogger() = default;
     ~TinyLogger();
 
     TinyLogger(const TinyLogger &rhs) = delete;

@@ -9,15 +9,6 @@ using std::string;
 // TODO: comments
 // TODO: config mingw，C++11, 14
 
-TinyLogger::TinyLogger()
-{
-    this->target = LogTarget::terminal;
-    this->level = LogLevel::debug;
-    this->isAsync = false;
-    this->blockQueue = nullptr;
-    this->writeThread = nullptr;
-}
-
 TinyLogger::~TinyLogger()
 {
     if (this->writeThread && this->writeThread->joinable())
@@ -56,6 +47,11 @@ void TinyLogger::init(const LogTarget &target, const LogLevel &level, const std:
     {
         std::lock_guard<std::mutex> lck(mtx);
         this->outFile.open(this->path, std::ios::out | std::ios::app);
+        if (!this->outFile)
+        {
+            std::cerr << "Error opening log file: " << this->path << std::endl;
+            exit(EXIT_FAILURE);
+        }
     }
 
     if (maxQueueCapacity > 1)  //  maxCapacity > 1: async, maxCapacity == 1: sync
