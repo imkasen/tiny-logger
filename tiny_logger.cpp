@@ -7,7 +7,6 @@ using std::string;
 
 // TODO: async, promise and future, ...
 // TODO: comments
-// TODO: config mingw，C++11, 14
 
 TinyLogger::~TinyLogger()
 {
@@ -172,29 +171,32 @@ void TinyLogger::write(const std::string &text, const LogLevel &level, const cha
     }
 }
 
-void TinyLogger::DEBUG(const std::string &text)
+void TinyLogger::debug(const std::string &text, const char *date, const char *time, const std::string &file,
+                       const std::string &func, const int line)
 {
-    this->write(text, LogLevel::debug, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
+    this->write(text, LogLevel::debug, date, time, file, func, line);
 }
 
-/*
-void TinyLogger::INFO(const std::string &text)
+void TinyLogger::info(const std::string &text, const char *date, const char *time, const std::string &file,
+                      const std::string &func, const int line)
 {
-    this->write(text, LogLevel::info);
+    this->write(text, LogLevel::info, date, time, file, func, line);
 }
 
-void TinyLogger::WARNING(const std::string &text)
+void TinyLogger::warning(const std::string &text, const char *date, const char *time, const std::string &file,
+                         const std::string &func, const int line)
 {
-    this->write(text, LogLevel::warning);
+    this->write(text, LogLevel::warning, date, time, file, func, line);
 }
 
-void TinyLogger::ERROR(const std::string &text)
+void TinyLogger::error(const std::string &text, const char *date, const char *time, const std::string &file,
+                       const std::string &func, const int line)
 {
-    this->write(text, LogLevel::error);
+    this->write(text, LogLevel::error, date, time, file, func, line);
 }
 
-void TinyLogger::FATAL(const std::string &text)
+void TinyLogger::fatal(const std::string &text, const char *date, const char *time, const std::string &file,
+                       const std::string &func, const int line)
 {
-    this->write(text, LogLevel::fatal);
+    this->write(text, LogLevel::fatal, date, time, file, func, line);
 }
-*/
