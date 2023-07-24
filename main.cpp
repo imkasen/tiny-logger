@@ -6,10 +6,10 @@ int main()
     logger->init(TinyLogger::LogTarget::file_and_terminal, TinyLogger::LogLevel::debug, "./log", 1024);
 
     logger->DEBUG("debug");
-    logger->INFO("info");
-    logger->WARNING("warning");
-    logger->ERROR("error");
-    logger->FATAL("fatal");
+    // logger->INFO("info");
+    // logger->WARNING("warning");
+    // logger->ERROR("error");
+    // logger->FATAL("fatal");
 
     return 0;
 }

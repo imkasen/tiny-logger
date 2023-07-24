@@ -124,9 +124,12 @@ void TinyLogger::asyncOutput()
     }
 }
 
-void TinyLogger::write(const std::string &text, const LogLevel &level)
+void TinyLogger::write(const std::string &text, const LogLevel &level, const char *date, const char *time,
+                       const string &file, const string &func, const int line)
 {
     std::lock_guard<std::mutex> lck(mtx);
+
+    // organize output message
     string msg = "";
     switch (level)
     {
@@ -149,9 +152,9 @@ void TinyLogger::write(const std::string &text, const LogLevel &level)
             msg = "[UNKNOWN] ";
             break;
     }
-    // TODO: __FILE__, __FUNC__, __TIME__, ...
-    msg += static_cast<string>(__DATE__) + " " + static_cast<string>(__TIME__) + " " + std::to_string(__LINE__) + " " +
-           +__FUNCTION__ + " " + __FILE__ + " : " + text + "\n";
+    // TODO: ms, μs
+    msg += static_cast<string>(date) + " " + static_cast<string>(time) + " - " + file + " - " + func + "() - Line " +
+           std::to_string(line) + ": " + text + "\n";
 
     if (level >= this->level)
     {
@@ -175,9 +178,10 @@ void TinyLogger::write(const std::string &text, const LogLevel &level)
 
 void TinyLogger::DEBUG(const std::string &text)
 {
-    this->write(text, LogLevel::debug);
+    this->write(text, LogLevel::debug, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
 }
 
+/*
 void TinyLogger::INFO(const std::string &text)
 {
     this->write(text, LogLevel::info);
@@ -197,3 +201,4 @@ void TinyLogger::FATAL(const std::string &text)
 {
     this->write(text, LogLevel::fatal);
 }
+*/

@@ -40,10 +40,10 @@ public:
     static void flushLogThread();
 
     void DEBUG(const std::string &text);
-    void INFO(const std::string &text);
-    void WARNING(const std::string &text);
-    void ERROR(const std::string &text);
-    void FATAL(const std::string &text);
+    // void INFO(const std::string &text);
+    // void WARNING(const std::string &text);
+    // void ERROR(const std::string &text);
+    // void FATAL(const std::string &text);
 
 private:
     LogTarget target;
@@ -67,7 +67,8 @@ private:
     TinyLogger &operator=(const TinyLogger &rhs) = delete;
     TinyLogger &operator=(TinyLogger &&rhs) = delete;
 
-    void write(const std::string &text, const LogLevel &level);
+    void write(const std::string &text, const LogLevel &level, const char *date, const char *time,
+               const std::string &file, const std::string &func, const int line);
     void asyncOutput();
 };
 
