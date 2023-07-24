@@ -1,4 +1,5 @@
 #include "tiny_logger.h"
+#include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -61,21 +62,25 @@ void TinyLogger::init(const LogTarget &target, const LogLevel &level, const std:
     }
 }
 
-/*
 string TinyLogger::getCurrentTime()
 {
-    std::time_t now_t = time(nullptr);
+    const auto now = std::chrono::system_clock::now();
+    const std::time_t now_t = std::chrono::system_clock::to_time_t(now);
+    const auto us = std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count() % 1000000;
     struct tm now_s;
+
 #ifdef _WIN32
     localtime_s(&now_s, &now_t);
-#else
+#elif defined(__linux__) || defined(__unix__)
     localtime_r(&now_t, &now_s);
+#else
+#error "Unknown Platform"
 #endif
+
     return std::to_string(now_s.tm_year + 1900) + "-" + std::to_string(now_s.tm_mon + 1) + "-" +
            std::to_string(now_s.tm_mday) + " " + std::to_string(now_s.tm_hour) + ":" + std::to_string(now_s.tm_min) +
-           ":" + std::to_string(now_s.tm_sec);
+           ":" + std::to_string(now_s.tm_sec) + "." + std::to_string(us);
 }
-*/
 
 void TinyLogger::setLevel(const LogLevel &level)
 {
@@ -119,8 +124,8 @@ void TinyLogger::asyncOutput()
     }
 }
 
-void TinyLogger::write(const std::string &text, const LogLevel &level, const char *date, const char *time,
-                       const string &file, const string &func, const int line)
+void TinyLogger::write(const std::string &text, const LogLevel &level, const string &file, const string &func,
+                       const int line)
 {
     std::lock_guard<std::mutex> lck(mtx);
 
@@ -147,9 +152,8 @@ void TinyLogger::write(const std::string &text, const LogLevel &level, const cha
             msg = "[UNKNOWN] ";
             break;
     }
-    // TODO: ms, μs
-    msg += static_cast<string>(date) + " " + static_cast<string>(time) + " - " + file + " - " + func + "() - Line " +
-           std::to_string(line) + ": " + text + "\n";
+    msg += TinyLogger::getCurrentTime() + " - " + file + " - " + func + "() - Line " + std::to_string(line) + ": " +
+           text + "\n";
 
     if (level >= this->level)
     {
@@ -171,32 +175,27 @@ void TinyLogger::write(const std::string &text, const LogLevel &level, const cha
     }
 }
 
-void TinyLogger::debug(const std::string &text, const char *date, const char *time, const std::string &file,
-                       const std::string &func, const int line)
+void TinyLogger::debug(const std::string &text, const std::string &file, const std::string &func, const int line)
 {
-    this->write(text, LogLevel::debug, date, time, file, func, line);
+    this->write(text, LogLevel::debug, file, func, line);
 }
 
-void TinyLogger::info(const std::string &text, const char *date, const char *time, const std::string &file,
-                      const std::string &func, const int line)
+void TinyLogger::info(const std::string &text, const std::string &file, const std::string &func, const int line)
 {
-    this->write(text, LogLevel::info, date, time, file, func, line);
+    this->write(text, LogLevel::info, file, func, line);
 }
 
-void TinyLogger::warning(const std::string &text, const char *date, const char *time, const std::string &file,
-                         const std::string &func, const int line)
+void TinyLogger::warning(const std::string &text, const std::string &file, const std::string &func, const int line)
 {
-    this->write(text, LogLevel::warning, date, time, file, func, line);
+    this->write(text, LogLevel::warning, file, func, line);
 }
 
-void TinyLogger::error(const std::string &text, const char *date, const char *time, const std::string &file,
-                       const std::string &func, const int line)
+void TinyLogger::error(const std::string &text, const std::string &file, const std::string &func, const int line)
 {
-    this->write(text, LogLevel::error, date, time, file, func, line);
+    this->write(text, LogLevel::error, file, func, line);
 }
 
-void TinyLogger::fatal(const std::string &text, const char *date, const char *time, const std::string &file,
-                       const std::string &func, const int line)
+void TinyLogger::fatal(const std::string &text, const std::string &file, const std::string &func, const int line)
 {
-    this->write(text, LogLevel::fatal, date, time, file, func, line);
+    this->write(text, LogLevel::fatal, file, func, line);
 }

@@ -31,7 +31,7 @@ public:
     void init(const LogTarget &target, const LogLevel &level, const std::string &path = "./log",
               const size_t maxQueueCapacity = 0);
 
-    std::string getCurrentTime();
+    static std::string getCurrentTime();
     void setLevel(const LogLevel &level);
     LogLevel getLevel() const;
     void setTarget(const LogTarget &target);
@@ -39,16 +39,11 @@ public:
 
     static void flushLogThread();
 
-    void debug(const std::string &text, const char *date, const char *time, const std::string &file,
-               const std::string &func, const int line);
-    void info(const std::string &text, const char *date, const char *time, const std::string &file,
-              const std::string &func, const int line);
-    void warning(const std::string &text, const char *date, const char *time, const std::string &file,
-                 const std::string &func, const int line);
-    void error(const std::string &text, const char *date, const char *time, const std::string &file,
-               const std::string &func, const int line);
-    void fatal(const std::string &text, const char *date, const char *time, const std::string &file,
-               const std::string &func, const int line);
+    void debug(const std::string &text, const std::string &file, const std::string &func, const int line);
+    void info(const std::string &text, const std::string &file, const std::string &func, const int line);
+    void warning(const std::string &text, const std::string &file, const std::string &func, const int line);
+    void error(const std::string &text, const std::string &file, const std::string &func, const int line);
+    void fatal(const std::string &text, const std::string &file, const std::string &func, const int line);
 
 private:
     LogTarget target = LogTarget::terminal;
@@ -72,16 +67,15 @@ private:
     TinyLogger &operator=(const TinyLogger &rhs) = delete;
     TinyLogger &operator=(TinyLogger &&rhs) = delete;
 
-    void write(const std::string &text, const LogLevel &level, const char *date, const char *time,
-               const std::string &file, const std::string &func, const int line);
+    void write(const std::string &text, const LogLevel &level, const std::string &file, const std::string &func,
+               const int line);
     void asyncOutput();
 };
 
-#define LOG_DEBUG(text) TinyLogger::getInstance()->debug(text, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
-#define LOG_INFO(text) TinyLogger::getInstance()->info(text, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
-#define LOG_WARNING(text) \
-    TinyLogger::getInstance()->warning(text, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
-#define LOG_ERROR(text) TinyLogger::getInstance()->info(text, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
-#define LOG_FATAL(text) TinyLogger::getInstance()->info(text, __DATE__, __TIME__, __FILE__, __FUNCTION__, __LINE__);
+#define LOG_DEBUG(text) TinyLogger::getInstance()->debug(text, __FILE__, __FUNCTION__, __LINE__);
+#define LOG_INFO(text) TinyLogger::getInstance()->info(text, __FILE__, __FUNCTION__, __LINE__);
+#define LOG_WARNING(text) TinyLogger::getInstance()->warning(text, __FILE__, __FUNCTION__, __LINE__);
+#define LOG_ERROR(text) TinyLogger::getInstance()->error(text, __FILE__, __FUNCTION__, __LINE__);
+#define LOG_FATAL(text) TinyLogger::getInstance()->fatal(text, __FILE__, __FUNCTION__, __LINE__);
 
 #endif
