@@ -13,7 +13,7 @@ private:
     typename std::queue<T>::size_type cap;  // capacity
 
     std::mutex mtx;
-    bool isClose;  // TODO: atomic?
+    bool isClose;
 
     std::condition_variable consumer;
     std::condition_variable producer;

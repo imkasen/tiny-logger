@@ -6,9 +6,6 @@
 
 using std::string;
 
-// TODO: async, promise and future, ...
-// TODO: comments
-
 TinyLogger::~TinyLogger()
 {
     if (this->writeThread && this->writeThread->joinable())
@@ -58,6 +55,7 @@ void TinyLogger::init(const LogTarget &target, const LogLevel &level, const std:
     {
         this->isAsync = true;
         blockQueue = std::make_unique<BlockQueue<string>>(maxQueueCapacity);
+        // create one single thread to read log messages constantly from the block queue and write them into log file
         writeThread = std::make_unique<std::thread>(flushLogThread);
     }
 }
@@ -77,6 +75,7 @@ string TinyLogger::getCurrentTime()
 #error "Unknown Platform"
 #endif
 
+    // [level] Year-Month-Day hours:minutes:seconds.microseconds - file_name - func_name - line_number: messages.
     return std::to_string(now_s.tm_year + 1900) + "-" + std::to_string(now_s.tm_mon + 1) + "-" +
            std::to_string(now_s.tm_mday) + " " + std::to_string(now_s.tm_hour) + ":" + std::to_string(now_s.tm_min) +
            ":" + std::to_string(now_s.tm_sec) + "." + std::to_string(us);
